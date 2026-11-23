@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
+
+<title>Ditseey's Shop</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&amp;family=Source+Sans+3:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap">
+<style>
+/* Layout: a merchant's ledger. Header band and tabs, then the wares list beside a sticky Merchant token helper (a bottom sheet on phones). */
+:root{
+  /* single look, matched to the Builders player tracker: slate panels, violet-to-teal gradient */
+  --bg:#323846; --surface:#3a4150; --surface2:#434b5c; --line:#525b6e;
+  --ink:#e4e7ee; --muted:#a3abbb; --accent:#45b2bf; --accent-ink:#1f2530; --teal:#60b0ca; --teal-soft:#36505a;
+  --amethyst:#c2a9f5; --sapphire:#9fb8e6; --good:#7ad3b4; --warn:#f0b27a; --sale:#f49ab0; --shadow:rgba(0,0,0,.45);
+  --grad:linear-gradient(90deg,#d8a8ff,#c2a9f5,#abaaeb,#93ace0,#7aaed5,#60b0ca,#45b2bf);
+  --display:"Cinzel",Georgia,serif; --body:"Source Sans 3","Segoe UI",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px;display:grid;gap:16px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;letter-spacing:.02em}
+h1{font-size:clamp(1.7rem,4vw,2.4rem);background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{font-size:1.15rem}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.muted{color:var(--muted)} .small{font-size:.86rem}
+.label{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+
+.head{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-end;justify-content:space-between;border-bottom:3px solid transparent;border-image:var(--grad) 1;padding-bottom:14px}
+.head .sub{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin-top:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 10px;font-size:.85rem}
+.chip.sale{border-color:var(--sale);color:var(--sale);font-weight:700}
+.chip.portal{cursor:pointer;color:var(--ink)}
+.chip.portal code{font-family:var(--mono);font-size:.85rem;font-weight:600}
+.chip.portal:hover{border-color:var(--teal)}
+.coin{display:inline-block;width:.8em;height:.8em;border-radius:50%;background:radial-gradient(circle at 35% 35%,#f3d98b,#b8892c 70%);box-shadow:inset 0 0 0 1px #8a6418;vertical-align:-.05em}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px;font-weight:600;text-decoration:none;color:inherit;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--teal)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.teal{background:var(--teal);border-color:var(--teal);color:var(--accent-ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.mini{font-size:.8rem;padding:4px 9px}
+
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line)}
+.tab{border:0;background:transparent;padding:8px 14px;font-weight:700;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1px;text-decoration:none}
+.tab[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent)}
+.note{background:var(--teal-soft);border-radius:10px;padding:10px 14px}
+
+.main{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:18px;align-items:start}
+@media (max-width:900px){.main{grid-template-columns:minmax(0,1fr)}}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.search{flex:1 1 220px;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 12px}
+.cats{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.cat{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font-size:.88rem}
+.cat[aria-pressed="true"]{background:var(--amethyst);border-color:var(--amethyst);color:var(--accent-ink)}
+.cat.tokcat{border-style:dashed}
+.cat.tokcat[aria-pressed="true"]{border-style:solid;background:var(--accent);border-color:var(--accent)}
+.toggle{display:inline-flex;gap:6px;align-items:center;font-size:.9rem}
+.filtered{display:flex;gap:8px;align-items:center;font-size:.88rem;margin-bottom:8px}
+
+.group h3{font-size:.95rem;color:var(--amethyst);padding:12px 2px 6px;border-bottom:1px solid var(--line)}
+.ware{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 14px;align-items:center;padding:10px 8px;border-bottom:1px solid var(--line);border-radius:6px;cursor:pointer}
+.ware:hover{background:var(--surface)}
+.ware[aria-selected="true"]{background:var(--teal-soft)}
+.ware .nm{font-weight:700}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;align-items:center}
+.tag{border:1px solid var(--line);background:var(--surface);border-radius:5px;padding:1px 7px;font-size:.78rem;color:var(--sapphire);font-weight:600}
+.tag.kind{color:var(--muted);font-weight:600}
+.tag:hover{border-color:var(--teal)}
+.stock{font-size:.8rem;font-weight:600}
+.stock.out{color:var(--warn)} .stock.ok{color:var(--good)}
+.price{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.price .amt{font-weight:700;font-size:1.05rem}
+.price s{color:var(--muted);margin-right:4px}
+.price .per{display:block;font-size:.78rem;color:var(--muted)}
+.empty{padding:24px;text-align:center;color:var(--muted)}
+
+/* token helper */
+.helper{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--sapphire);border-radius:10px;padding:14px;display:grid;gap:10px}
+.helper .x{display:none}
+.cmd{display:grid;gap:6px;background:var(--surface2);border-radius:8px;padding:8px 10px}
+.cmd code{font-family:var(--mono);font-size:.78rem;white-space:pre-wrap;word-break:break-word}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.qty{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:8px;background:var(--bg);overflow:hidden}
+.qty button{border:0;background:transparent;width:32px;height:32px;font-size:1.1rem;font-weight:700}
+.qty span{min-width:28px;text-align:center;font-variant-numeric:tabular-nums;font-weight:700}
+.rule{font-size:.86rem;color:var(--muted)}
+.field{display:grid;gap:3px;font-size:.82rem;color:var(--muted);font-weight:600}
+.field input,.field select,.field textarea{border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:7px 9px;min-width:0;width:100%;color:var(--ink);font-weight:400}
+@media (max-width:900px){
+  .helper{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:20;border-radius:14px 14px 0 0;max-height:70vh;overflow:auto;box-shadow:0 -6px 24px var(--shadow);
+    padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))}
+  .helper.idle{display:none}
+  .helper .x{display:inline-flex}
+}
+
+/* requests */
+.reqgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:760px){.reqgrid{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:10px;min-width:0}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end}
+.form label{display:grid;gap:3px;font-size:.82rem;color:var(--muted);font-weight:600}
+.form input,.form select,.form textarea,.tbl input,.tbl select{border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:6px 8px;min-width:0;width:100%;color:var(--ink)}
+
+/* backend */
+.adminbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;background:var(--ink);color:var(--bg);border-radius:10px;padding:10px 14px}
+.adminbar .btn{background:transparent;color:var(--bg);border-color:var(--muted)}
+.tblwrap{overflow-x:auto}
+.tbl{border-collapse:collapse;width:100%;min-width:880px;font-size:.88rem}
+.tbl th{text-align:left;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:6px;border-bottom:1px solid var(--line)}
+.tbl td{padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl td.num input{width:80px;text-align:right}
+.tbl .stockbox{display:flex;gap:4px;align-items:center}
+.tbl .stockbox input{width:56px;text-align:right}
+.savebar{position:sticky;bottom:0;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--accent);border-radius:10px;padding:10px 14px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+textarea.listing{font-family:var(--mono);font-size:.8rem;min-height:220px;width:100%;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:10px;color:var(--ink)}
+.hint{font-size:.82rem;color:var(--muted)}
+.dirty{color:var(--warn);font-weight:700}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<script id="shop-data" type="application/json">{"shop":{"name":"Ditseey's Shop","owner":"Ditseey","discordId":"275074981505925120","where":"","note":"Everything here is for sale at my in-game store.","saleOn":false,"salePct":25},"items":[{"id":"i01","name":"Ashwood","cat":"Wood & Building","price":200,"unit":"stack","stack":50,"stock":22,"token":"I Can't Believe It's Not Coal","show":true},{"id":"i02","name":"Asksvin Bladder","cat":"Hides & Drops","price":50,"unit":"stack","stack":50,"stock":0,"token":"Why Are You Asksvin Me?","show":true},{"id":"i03","name":"Asksvin Hide","cat":"Hides & Drops","price":50,"unit":"stack","stack":50,"stock":0,"token":"Why Are You Asksvin Me?","show":true},{"id":"i04","name":"Asksvin Tail","cat":"Hides & Drops","price":50,"unit":"stack","stack":20,"stock":0,"token":"","show":true},{"id":"i05","name":"Barley","cat":"Farmed Goods","price":100,"unit":"stack","stack":100,"stock":6,"token":"Seed Banking","show":true},{"id":"i06","name":"Black Core","cat":"Cores & Gems","price":100,"unit":"each","stack":1,"stock":0,"token":"","show":true},{"id":"i07","name":"Black Marble","cat":"Wood & Building","price":80,"unit":"stack","stack":100,"stock":null,"token":"Misty Merchant","show":true},{"id":"i08","name":"Black Metal","cat":"Metals","price":250,"unit":"stack","stack":30,"stock":0,"token":"Metalworker","show":true},{"id":"i09","name":"Blood Bags","cat":"Hides & Drops","price":75,"unit":"stack","stack":50,"stock":6,"token":"Bloodbagger","show":true},{"id":"i10","name":"Boar Meat","cat":"Meat","price":20,"unit":"stack","stack":20,"stock":6,"token":"Butcher","show":true},{"id":"i11","name":"Carapace Arrows","cat":"Ammo","price":75,"unit":"stack","stack":100,"stock":0,"token":"Fletcher","show":true},{"id":"i12","name":"Carrots","cat":"Farmed Goods","price":75,"unit":"stack","stack":50,"stock":0,"token":"Veggie Sales","show":true},{"id":"i13","name":"Charred Bolt","cat":"Ammo","price":75,"unit":"stack","stack":100,"stock":null,"token":"Not So Magic Missile","show":true},{"id":"i14","name":"Chicken Meat","cat":"Meat","price":50,"unit":"stack","stack":20,"stock":6,"token":"Butcher","show":true},{"id":"i15","name":"Cloudberries","cat":"Pickables","price":50,"unit":"stack","stack":50,"stock":12,"token":"Very Berry","show":true},{"id":"i16","name":"Copper","cat":"Metals","price":60,"unit":"stack","stack":30,"stock":0,"token":"Bronze Age Prospector","show":true},{"id":"i17","name":"Crystal","cat":"Crafting Supplies","price":250,"unit":"stack","stack":50,"stock":15,"token":"Crystal Clear","show":true},{"id":"i18","name":"Deer Hide","cat":"Hides & Drops","price":50,"unit":"stack","stack":50,"stock":0,"token":"","show":true},{"id":"i19","name":"Feathers","cat":"Hides & Drops","price":50,"unit":"stack","stack":50,"stock":0,"token":"Bird Is The Word","show":true},{"id":"i20","name":"Flametal","cat":"Metals","price":300,"unit":"half stack","stack":15,"stock":0,"token":"","show":true},{"id":"i21","name":"Gem Set","cat":"Cores & Gems","price":999,"unit":"set","stack":3,"stock":0,"token":"My Preciouses","show":true},{"id":"i22","name":"Grausten","cat":"Wood & Building","price":50,"unit":"stack","stack":50,"stock":36,"token":"Ashen Adventurer","show":true},{"id":"i23","name":"Hare Meat","cat":"Meat","price":100,"unit":"stack","stack":20,"stock":6,"token":"Butcher","show":true},{"id":"i24","name":"Leather Scraps","cat":"Hides & Drops","price":25,"unit":"stack","stack":50,"stock":0,"token":"","show":true},{"id":"i25","name":"Lox Meat","cat":"Meat","price":50,"unit":"stack","stack":20,"stock":18,"token":"Butcher","show":true},{"id":"i26","name":"Molten Core","cat":"Cores & Gems","price":100,"unit":"2","stack":2,"stock":0,"token":"","show":true},{"id":"i27","name":"Obsidian","cat":"Crafting Supplies","price":150,"unit":"stack","stack":50,"stock":4,"token":"Black Glass","show":true},{"id":"i28","name":"Onions","cat":"Farmed Goods","price":75,"unit":"stack","stack":50,"stock":9,"token":"Veggie Sales","show":true},{"id":"i29","name":"Red Mushrooms","cat":"Pickables","price":75,"unit":"stack","stack":50,"stock":9,"token":"Fun Gal","show":true},{"id":"i30","name":"Silver","cat":"Metals","price":300,"unit":"stack","stack":30,"stock":0,"token":"Metalworker","show":true},{"id":"i31","name":"Tar","cat":"Crafting Supplies","price":250,"unit":"stack","stack":50,"stock":24,"token":"Tarrific","show":true},{"id":"i32","name":"Turnip Seeds","cat":"Seeds","price":100,"unit":"stack","stack":100,"stock":4,"token":"Seed Banking","show":true},{"id":"i33","name":"Turnips","cat":"Farmed Goods","price":75,"unit":"stack","stack":50,"stock":11,"token":"Veggie Sales","show":true},{"id":"i34","name":"Wolf Meat","cat":"Meat","price":50,"unit":"stack","stack":20,"stock":0,"token":"Butcher","show":true},{"id":"i35","name":"Yellow Mushrooms","cat":"Pickables","price":75,"unit":"stack","stack":50,"stock":1,"token":"Fun Gal","show":true}],"updated":"2026-11-23"}</script>
+
+<div class="wrap">
+  <header class="head">
+    <div>
+      <div class="label">Comfy Valheim player shop</div>
+      <h1 id="shopName">Ditseey's Shop</h1>
+      <div class="sub">
+        <span class="chip"><span class="coin" aria-hidden="true"></span> Prices in gold</span>
+        <span class="chip" id="whereChip" hidden=""></span>
+        <span class="chip sale" id="saleChip" hidden="">Sale</span>
+        <span class="small muted" id="updated"></span>
+      </div>
+      <div class="sub" id="portals" hidden></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a class="btn primary" id="msgLinkTop" href="#" target="_blank" rel="noopener" hidden>Message <span class="ownerName">Ditseey</span> on Discord</a>
+      
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs" aria-label="Sections">
+    <a class="tab" href="#shop" data-view="shop">Shop</a>
+    <a class="tab" href="#requests" data-view="requests">Requests</a>
+  </nav>
+
+  <!-- SHOP -->
+  <section id="shopView" style="display:grid;gap:14px">
+    <div class="note small" id="shopNote"></div>
+    <div class="main">
+      <div>
+        <div class="tools">
+          <input id="q" class="search" type="search" placeholder="Search items or Merchant tokens" aria-label="Search">
+          <label class="toggle"><input id="inStock" type="checkbox"> In stock only</label>
+        </div>
+        <div class="cats" id="cats" role="group" aria-label="Categories"></div>
+        <div class="cats" id="tokCats" role="group" aria-label="Merchant token filters"></div>
+        <div class="filtered" id="tagFilter" hidden=""><span>Showing items for <b id="tagName"></b></span><button class="btn mini" id="clearTag" type="button">Show all</button></div>
+        <div id="wares"></div>
+      </div>
+
+      <aside class="helper idle" id="helper" aria-label="Merchant token helper">
+        <div class="row"><h2>Merchant tokens</h2><button class="btn mini x" id="closeHelper" type="button">Close</button></div>
+        <div id="helperBody"></div>
+        <details>
+          <summary class="small" style="cursor:pointer;font-weight:600">Spent 1,500g or more?</summary>
+          <div style="display:grid;gap:8px;margin-top:8px">
+            <label class="field">Total gold you spent<input id="spent" type="number" min="0" step="5" inputmode="numeric"></label>
+            <label class="field">What you bought<input id="spentWhat" placeholder="e.g. 4 stacks of Tar, 2 stacks of Crystal"></label>
+            <div id="spenderOut"></div>
+          </div>
+        </details>
+      </aside>
+    </div>
+  </section>
+
+  <!-- REQUESTS -->
+  <section id="requestsView" hidden="">
+    <div class="reqgrid">
+      <div class="card">
+        <h2>Request an item</h2>
+        <p class="small muted" style="margin:0">Looking for something that isn't in the shop, or need more than what's in stock? Tell <span class="ownerName">Ditseey</span> what you want and what you'd pay. Fill this in, copy the message, and send it on Discord.</p>
+        <div class="form">
+          <label style="grid-column:1/-1">Item<input id="rItem" list="rItems" placeholder="e.g. Black Metal" autocomplete="off"></label>
+          <label>How many<input id="rQty" placeholder="e.g. 3 stacks"></label>
+          <label>Your offer (gold)<input id="rOffer" type="number" min="0" step="5" inputmode="numeric"></label>
+          <label>Needed by<input id="rBy" placeholder="optional"></label>
+          <label style="grid-column:1/-1">Anything else<textarea id="rNotes" rows="2" placeholder="optional"></textarea></label>
+        </div>
+        <datalist id="rItems"></datalist>
+      </div>
+      <div class="card">
+        <div class="row"><h2>Your request</h2><button class="btn mini" id="copyReq" type="button">Copy</button></div>
+        <div class="cmd"><code id="reqMsg">Fill in the item and your offer to build your message.</code></div>
+        <div class="small muted">Copy it, then open <b class="ownerName">Ditseey</b>'s Discord profile, click Message, and paste it in.</div>
+        <a class="btn teal" id="msgLink" href="#" target="_blank" rel="noopener" hidden="">Message <span class="ownerName">Ditseey</span> on Discord</a>
+      </div>
+    </div>
+  </section>
+
+  
+</div>
+
+<script>
+(function(){
+const SRC_BODY = document.body.innerHTML;   // the page as published, so a save can swap in the new data
+const TOKENS = [{"n": "Armorer", "c": "Manufacturing", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 fully upgraded or overleveled helmet, leg, or chest piece - Swamp tier or better.", "x": "Specify the level.", "t": "/merchant token token:Armorer amount:<# of Times Completed> notes:<Details/levels of items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Ashen Adventurer", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of grausten, charred bones/skull, Morgen sinew, Morgen heart, proustite powder, sulfur OR 1 set of 4 molten cores.", "x": "", "t": "/merchant token token:Ashen Adventurer amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Bait N Fish", "c": "Manufacturing", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of crafted fishing bait.", "x": "Specify the type(s) - common bait does not count.", "t": "/merchant token token:Bait N Fish amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Baker", "c": "Retail", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of oven-baked non-magic food (bread, lox pie, honey glazed chicken, etc.).", "x": "Ashlands foods belong to THAT'S A SPICY MEATBALL.", "t": "/merchant token token:Baker amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Bedazzled", "c": "Retail", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell any fully upgraded or overleveled gem-enhanced melee or ranged weapon.", "x": "Magic staves belong to Staff Application.", "t": "/merchant token token:Bedazzled amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Birch Please", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of finewood.", "x": "", "t": "/merchant token token:Birch Please amount:<# of Times Completed> recipient:@mentionplayer"}, {"n": "Bird Is The Word", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of feathers.", "x": "", "t": "/merchant token token:Bird Is The Word amount:<# of Times Completed> recipient:@mentionplayer"}, {"n": "Black Glass", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of obsidian.", "x": "", "t": "/merchant token token:Black Glass amount:<# of Times Completed> recipient:@mentionplayer"}, {"n": "Blacksmith", "c": "Manufacturing", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 fully upgraded or overleveled weapon or tool.", "x": "Specify the level. Not allowed: Magic staves, stone age tools, build hammers, harpoons, and shovels, unless they are overleveled Creator loot, which will need screenshots of the durability.", "t": "/merchant token token:Blacksmith amount:<# of Times Completed> notes:<Details/levels of items bought/sold/traded> recipient:@mentionplayer image:<hover to show durability if overleveled Creator loot>"}, {"n": "Bloodbagger", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of bloodbags or blood clots.", "x": "", "t": "/merchant token token:Bloodbagger amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Boom Boom Pow", "c": "Retail", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of any bombs.", "x": "", "t": "/merchant token token:Boom Boom Pow amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Bronze Age Prospector", "c": "Manufacturing", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of copper, tin, or bronze (raw ore or smelted).", "x": "", "t": "/merchant token token:Bronze Age Prospector amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Busy Bee", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 queen bee.", "x": "", "t": "/merchant token token:Busy Bee amount:<# of Times Completed> recipient:@mentionplayer"}, {"n": "Butcher", "c": "Retail", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of raw or cooked boar, deer, wolf, fish, lox, chicken, seeker, or hare meat.", "x": "", "t": "/merchant token token:Butcher amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Carpenter", "c": "Retail", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of bronze or iron nails.", "x": "", "t": "/merchant token token:Carpenter amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Cheep Cheep", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 16 stacks (1/2 black metal chest) of chicken eggs.", "x": "", "t": "/merchant token token:Cheep Cheep amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Cold As Ice", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of freeze glands.", "x": "", "t": "/merchant token token:Cold As Ice amount:<# of Times Completed> recipient:@mentionplayer"}, {"n": "Common Essence", "c": "Retail", "v": 4.0, "r": "1", "d": "Buy/Trade/Sell 1 pair of essences (1 of each thunderblood and frostfire) in a single transaction.", "x": "", "t": "/merchant token token:Common Essence amount:<# of Times Completed> recipient:@mentionplayer"}, {"n": "Crystal Clear", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of crystal.", "x": "", "t": "/merchant token token:Crystal Clear amount:<# of Times Completed> recipient:@mentionplayer"}, {"n": "Eitr!? I Didn't Even Know 'er!", "c": "Retail", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of Mistlands eitr food: Seeker Aspic, Yggdrasil Porridge, Cooked Stuffed Mushrooms.", "x": "", "t": "/merchant token token:Eitr!? I Didn't Even Know 'er! amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Feast Mode", "c": "Manufacturing", "v": 1.0, "r": "4", "d": "Buy/Sell/Trade 1 full stack of any Feasts", "x": "", "t": "/merchant token token:Feast Mode amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Fickle Thistle", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of thistle.", "x": "", "t": "/merchant token token:Fickle Thistle amount:<# of Times Completed> recipient:@mentionplayer"}, {"n": "Fisherman's Friend", "c": "Manufacturing", "v": 4.0, "r": "1", "d": "Buy/Trade/Sell 1 fully upgraded or overleveled fishing hat.", "x": "Specify the level.", "t": "/merchant token token:Fisherman's Friend amount:1 notes:<Provide the level> recipient:@mentionplayer"}, {"n": "Fletcher", "c": "Retail", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of arrows.", "x": "Specify the type(s) - wood, flint, and fire arrows do not count.", "t": "/merchant token token:Fletcher amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Flour Power", "c": "Retail", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 2 full stacks of flour.", "x": "", "t": "/merchant token token:Flour Power amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Frost Bite", "c": "Manufacturing", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 stack of Deep North food.", "x": "", "t": "/merchant token token: Frost Bite amount:<# of Times Completed> recipient:@mentionplayer"}, {"n": "Fun Gal", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of any of the following: red or yellow mushrooms, Jotun puffs, Magecaps, or smoke puffs", "x": "", "t": "/merchant token token:Fun Gal amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "GOOP There It Is", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1/2 stack (25 pieces) Ectoplasm", "x": "", "t": "/merchant token token:GOOP There It Is amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Gourmand", "c": "Retail", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of non-magic food cooked at a cauldron.", "x": "Oven-baked foods belong to Baker. Ashlands foods belong to THAT'S A SPICY MEATBALL.", "t": "/merchant token token:Gourmand amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Green Thumb", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of beech seeds, fir cones, pine cones, OR 25 birch seeds OR 5 acorns.", "x": "", "t": "/merchant token token:Green Thumb amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Honey I Sold The Bee Goo", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 16 stacks (1/2 black metal chest) of honey.", "x": "", "t": "/merchant token token:Honey I Sold The Bee Goo amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "I Can't Believe It's Not Coal", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack ashwood.", "x": "", "t": "/merchant token token:I Can't Believe It's Not Coal amount:<# of Times Completed> recipient:@mentionplayer"}, {"n": "Ice Ice Baby", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of ice", "x": "", "t": "/merchant token token:Ice Ice Baby amount:<# of Times Completed> recipient:@mentionplayer"}, {"n": "Long Live The Queen", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of royal jelly.", "x": "", "t": "/merchant token token:Long Live The Queen amount:<# of Times Completed> recipient:@mentionplayer"}, {"n": "Metalworker", "c": "Manufacturing", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of iron, silver, black metal, or flametal (raw ore or smelted).", "x": "", "t": "/merchant token token:Metalworker amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Misty Merchant", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of black marble, soft tissue, carapace, scale hide, or blue jute.", "x": "", "t": "/merchant token token:Misty Merchant amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "My Preciouses", "c": "Retail", "v": 4.0, "r": "1", "d": "Buy/Trade/Sell 1 full set of Ashlands gems (1 of each Bloodstone, Iolite, Jade) in a single transaction.", "x": "", "t": "/merchant token token:My Preciouses amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Neck Massager", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of Neck Tails.", "x": "", "t": "/merchant token token:Neck Massager amount:<# of Times Completed> recipient:@mentionplayer"}, {"n": "North Of Ordinary", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of deep north crafting materials.", "x": "", "t": "/merchant token token:North Of Ordinary amount:<# of Times Completed> recipient:@mentionplayer"}, {"n": "Not So Magic Missile", "c": "Retail", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of bolts or missiles.", "x": "Specify the type(s) - bone bolts and wooden missiles do not count.", "t": "/merchant token token:Not So Magic Missile amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "On Wednesdays We Wear Pink", "c": "Retail", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell any overleveled Hildir clothes.", "x": "Specify the level.", "t": "/merchant token token:On Wednesdays We Wear Pink amount:1 notes:<Details/levels of items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Pet Shop", "c": "Retail", "v": 4.0, "r": "1", "d": "Buy/Trade/Sell a breedable pair of tamed animals.", "x": "Excludes hatched animals (Chickens and Asksvin - they have their own tokens)", "t": "/merchant token token:Pet Shop amount:1 notes:<Details about animals bought/sold/traded> recipient:@mentionplayer"}, {"n": "Positively CAPEtivating", "c": "Manufacturing", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 fully upgraded or overleveled wolf, lox, feather, asksvin, ashen, or linen cape.", "x": "Specify the level.", "t": "/merchant token token:Positively CAPEtivating amount:<# of Times Completed> notes:<Details/levels of items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Rare Collector", "c": "Retail", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 Stone Golem, Wraith, Fuling Berserker, Rancid Remains, Seeker Soldier trophy, (NEW) Tick, Fallen Valkryie, Morgen, Ghost, Bear, Vile or Vulture trophy", "x": "", "t": "/merchant token token:Rare Collector amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Rootin' Tootin' and Shootin'", "c": "Manufacturing", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 fully upgraded or overleveled bow or crossbow - Swamp tier or better.", "x": "Specify the level. Lower tier bows allowed if overleveled Creator loot.", "t": "/merchant token token:Rootin' Tootin' and Shootin' amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Saddle Up", "c": "Manufacturing", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell lox or asksvin saddle.", "x": "", "t": "/merchant token token:Saddle Up amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Sappy To See You", "c": "Retail", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of sap.", "x": "", "t": "/merchant token token:Sappy To See You amount:<# of Times Completed> recipient:@mentionplayer"}, {"n": "Seed Banking", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack vegetable seeds, barley, flax, or vineberry seeds.", "x": "", "t": "/merchant token token:Seed Banking amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Serpent Slayer", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1/2 stack (25 pieces) serpent meat.", "x": "", "t": "/merchant token token:Serpent Slayer amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Shield Maiden", "c": "Manufacturing", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell any fully upgraded or overleveled shield from bronze tier or better.", "x": "Specify the level. Lower tier shields allowed if overleveled Creator loot.", "t": "/merchant token token:Shield Maiden amount:<# of Times Completed> notes:<Details/levels of items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Shiver Me Timbers", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of timber wood.", "x": "", "t": "/merchant token token:Shiver Me Timbers amount:<# of Times Completed> recipient:@mentionplayer"}, {"n": "Spender", "c": "Marketing", "v": 4.0, "r": "1", "d": "Make a purchase for 1500 gold or more. List gold value and items exchanged in the notes.", "x": "To be completed by the Buyer - do not fill out or add the recipient field, but list the seller in the Notes.", "t": "/merchant token token:Spender amount:1 notes:<List gold value and items exchanged and seller>"}, {"n": "Squawk Squawk", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack volture eggs.", "x": "", "t": "/merchant token token:Squawk Squawk amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Staff Application", "c": "Manufacturing", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 fully upgraded or overleveled magic staff.", "x": "Specify the level.", "t": "/merchant token token:Staff Application amount:<# of Times Completed> notes:<Details/level of items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Swamp Thing", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of ooze, guck, ancient bark, entrails or roots.", "x": "", "t": "/merchant token token:Swamp Thing amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Tarrific", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of tar.", "x": "", "t": "/merchant token token:Tarrific amount:<# of Times Completed> recipient:@mentionplayer"}, {"n": "THAT'S A SPICY MEATBALL", "c": "Retail", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of any Ashlands food.", "x": "", "t": "/merchant token token:THAT'S A SPICY MEATBALL amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Trophy Fisherman", "c": "Retail", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 trophy fish (L5 or above).", "x": "", "t": "/merchant token token:Trophy Fisherman amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Veggie Sales", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of any vegetable (carrot, turnip, onion).", "x": "", "t": "/merchant token token:Veggie Sales amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Why Are You Asksvin Me?", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of asksvin drops (hide, meat, bladder, eggs).", "x": "", "t": "/merchant token token:Why Are You Asksvin Me? amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "Very Berry", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of any berry (except pukeberries lmao).", "x": "", "t": "/merchant token token:Very Berry amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}, {"n": "YggdrawhatshouldIcallthis", "c": "Wholesale", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of Yggdrasil wood.", "x": "", "t": "/merchant token token:YggdrawhatshouldIcallthis amount:<# of Times Completed> recipient:@mentionplayer"}, {"n": "Your Strongest Potions", "c": "Retail", "v": 1.0, "r": "4", "d": "Buy/Trade/Sell 1 full stack of any type of fermented mead.", "x": "", "t": "/merchant token token:Your Strongest Potions amount:<# of Times Completed> notes:<Details about items bought/sold/traded> recipient:@mentionplayer"}];
+const CATALOG = [{"name": "Ashwood", "cat": "Wood & Building", "stack": 50, "unit": "stack", "token": "I Can't Believe It's Not Coal"}, {"name": "Asksvin Bladder", "cat": "Hides & Drops", "stack": 50, "unit": "stack", "token": "Why Are You Asksvin Me?"}, {"name": "Asksvin Hide", "cat": "Hides & Drops", "stack": 50, "unit": "stack", "token": "Why Are You Asksvin Me?"}, {"name": "Asksvin Tail", "cat": "Hides & Drops", "stack": 20, "unit": "stack", "token": ""}, {"name": "Barley", "cat": "Farmed Goods", "stack": 100, "unit": "stack", "token": "Seed Banking"}, {"name": "Black Core", "cat": "Cores & Gems", "stack": 1, "unit": "each", "token": ""}, {"name": "Black Marble", "cat": "Wood & Building", "stack": 100, "unit": "stack", "token": "Misty Merchant"}, {"name": "Black Metal", "cat": "Metals", "stack": 30, "unit": "stack", "token": "Metalworker"}, {"name": "Blood Bags", "cat": "Hides & Drops", "stack": 50, "unit": "stack", "token": "Bloodbagger"}, {"name": "Boar Meat", "cat": "Meat", "stack": 20, "unit": "stack", "token": "Butcher"}, {"name": "Carapace Arrows", "cat": "Ammo", "stack": 100, "unit": "stack", "token": "Fletcher"}, {"name": "Carrots", "cat": "Farmed Goods", "stack": 50, "unit": "stack", "token": "Veggie Sales"}, {"name": "Charred Bolt", "cat": "Ammo", "stack": 100, "unit": "stack", "token": "Not So Magic Missile"}, {"name": "Chicken Meat", "cat": "Meat", "stack": 20, "unit": "stack", "token": "Butcher"}, {"name": "Cloudberries", "cat": "Pickables", "stack": 50, "unit": "stack", "token": "Very Berry"}, {"name": "Copper", "cat": "Metals", "stack": 30, "unit": "stack", "token": "Bronze Age Prospector"}, {"name": "Crystal", "cat": "Crafting Supplies", "stack": 50, "unit": "stack", "token": "Crystal Clear"}, {"name": "Deer Hide", "cat": "Hides & Drops", "stack": 50, "unit": "stack", "token": ""}, {"name": "Feathers", "cat": "Hides & Drops", "stack": 50, "unit": "stack", "token": "Bird Is The Word"}, {"name": "Flametal", "cat": "Metals", "stack": 15, "unit": "half stack", "token": ""}, {"name": "Gem Set", "cat": "Cores & Gems", "stack": 3, "unit": "set", "token": "My Preciouses"}, {"name": "Grausten", "cat": "Wood & Building", "stack": 50, "unit": "stack", "token": "Ashen Adventurer"}, {"name": "Hare Meat", "cat": "Meat", "stack": 20, "unit": "stack", "token": "Butcher"}, {"name": "Leather Scraps", "cat": "Hides & Drops", "stack": 50, "unit": "stack", "token": ""}, {"name": "Lox Meat", "cat": "Meat", "stack": 20, "unit": "stack", "token": "Butcher"}, {"name": "Molten Core", "cat": "Cores & Gems", "stack": 2, "unit": "2", "token": ""}, {"name": "Obsidian", "cat": "Crafting Supplies", "stack": 50, "unit": "stack", "token": "Black Glass"}, {"name": "Onions", "cat": "Farmed Goods", "stack": 50, "unit": "stack", "token": "Veggie Sales"}, {"name": "Red Mushrooms", "cat": "Pickables", "stack": 50, "unit": "stack", "token": "Fun Gal"}, {"name": "Silver", "cat": "Metals", "stack": 30, "unit": "stack", "token": "Metalworker"}, {"name": "Tar", "cat": "Crafting Supplies", "stack": 50, "unit": "stack", "token": "Tarrific"}, {"name": "Turnip Seeds", "cat": "Seeds", "stack": 100, "unit": "stack", "token": "Seed Banking"}, {"name": "Turnips", "cat": "Farmed Goods", "stack": 50, "unit": "stack", "token": "Veggie Sales"}, {"name": "Wolf Meat", "cat": "Meat", "stack": 20, "unit": "stack", "token": "Butcher"}, {"name": "Yellow Mushrooms", "cat": "Pickables", "stack": 50, "unit": "stack", "token": "Fun Gal"}, {"name": "Wood", "cat": "Wood & Building", "stack": 50, "unit": "stack", "token": ""}, {"name": "Fine Wood", "cat": "Wood & Building", "stack": 50, "unit": "stack", "token": "Birch Please"}, {"name": "Core Wood", "cat": "Wood & Building", "stack": 50, "unit": "stack", "token": ""}, {"name": "Yggdrasil Wood", "cat": "Wood & Building", "stack": 50, "unit": "stack", "token": "YggdrawhatshouldIcallthis"}, {"name": "Stone", "cat": "Wood & Building", "stack": 50, "unit": "stack", "token": ""}, {"name": "Flint", "cat": "Crafting Supplies", "stack": 50, "unit": "stack", "token": ""}, {"name": "Resin", "cat": "Crafting Supplies", "stack": 50, "unit": "stack", "token": ""}, {"name": "Coal", "cat": "Crafting Supplies", "stack": 50, "unit": "stack", "token": ""}, {"name": "Tin", "cat": "Metals", "stack": 30, "unit": "stack", "token": "Bronze Age Prospector"}, {"name": "Bronze", "cat": "Metals", "stack": 30, "unit": "stack", "token": "Bronze Age Prospector"}, {"name": "Iron", "cat": "Metals", "stack": 30, "unit": "stack", "token": "Metalworker"}, {"name": "Bronze Nails", "cat": "Crafting Supplies", "stack": 100, "unit": "stack", "token": "Carpenter"}, {"name": "Iron Nails", "cat": "Crafting Supplies", "stack": 100, "unit": "stack", "token": "Carpenter"}, {"name": "Thistle", "cat": "Pickables", "stack": 50, "unit": "stack", "token": "Fickle Thistle"}, {"name": "Raspberries", "cat": "Pickables", "stack": 50, "unit": "stack", "token": "Very Berry"}, {"name": "Blueberries", "cat": "Pickables", "stack": 50, "unit": "stack", "token": "Very Berry"}, {"name": "Guck", "cat": "Crafting Supplies", "stack": 50, "unit": "stack", "token": "Swamp Thing"}, {"name": "Ooze", "cat": "Crafting Supplies", "stack": 50, "unit": "stack", "token": "Swamp Thing"}, {"name": "Entrails", "cat": "Hides & Drops", "stack": 50, "unit": "stack", "token": "Swamp Thing"}, {"name": "Root", "cat": "Crafting Supplies", "stack": 50, "unit": "stack", "token": "Swamp Thing"}, {"name": "Ancient Bark", "cat": "Wood & Building", "stack": 50, "unit": "stack", "token": "Swamp Thing"}, {"name": "Soft Tissue", "cat": "Crafting Supplies", "stack": 50, "unit": "stack", "token": "Misty Merchant"}, {"name": "Royal Jelly", "cat": "Crafting Supplies", "stack": 50, "unit": "stack", "token": "Long Live The Queen"}, {"name": "Sap", "cat": "Crafting Supplies", "stack": 50, "unit": "stack", "token": "Sappy To See You"}, {"name": "Freeze Gland", "cat": "Hides & Drops", "stack": 50, "unit": "stack", "token": "Cold As Ice"}, {"name": "Carrot Seeds", "cat": "Seeds", "stack": 100, "unit": "stack", "token": "Seed Banking"}, {"name": "Onion Seeds", "cat": "Seeds", "stack": 100, "unit": "stack", "token": "Seed Banking"}, {"name": "Flax", "cat": "Farmed Goods", "stack": 100, "unit": "stack", "token": "Seed Banking"}, {"name": "Bloodbag", "cat": "Hides & Drops", "stack": 50, "unit": "stack", "token": "Bloodbagger"}, {"name": "Ice", "cat": "Crafting Supplies", "stack": 50, "unit": "stack", "token": "Ice Ice Baby"}];
+const UNITS = [["stack","Stack"],["half stack","Half stack"],["each","Each"],["set","Set"],["2","Lot of 2"],["5","Lot of 5"],["10","Lot of 10"],["25","Lot of 25"]];
+let S = JSON.parse(document.getElementById("shop-data").textContent);
+let saved = JSON.stringify(S);
+let cat = "All", tagFilter = null, selected = null, amount = 1, canEdit = false, artifactNs = null;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = n => Number(n || 0).toLocaleString("en-US") + "g";
+const tokenBy = n => TOKENS.find(t => t.n === n);
+const round5 = n => Math.round(n / 5) * 5;
+const salePrice = it => S.shop.saleOn ? Math.max(5, round5(it.price * (1 - (Number(S.shop.salePct) || 0) / 100))) : it.price;
+const ANY_TOKEN = "Merchant token";
+const repeatOf = t => /^\d+$/.test(t.r) ? Number(t.r) : 99;
+function unitText(it, n){
+  const u = String(it.unit);
+  if (/^\d+$/.test(u)) return n === 1 ? "lot of " + u : n + " lots of " + u;
+  if (u === "each") return String(n);
+  return n + " " + u + (n === 1 ? "" : "s") + " of";
+}
+function perText(it){
+  const u = String(it.unit);
+  if (/^\d+$/.test(u)) return "for " + u;
+  if (u === "each") return "each";
+  const n = u === "stack" ? it.stack : u === "half stack" && it.stack ? Math.floor(it.stack / 2) : null;
+  return "per " + u + (n ? " (" + n + ")" : "");
+}
+
+/* ---------- views ---------- */
+function route(){
+  let v = (location.hash || "#shop").slice(1);
+  if (v === "backend" && !canEdit) v = "shop";
+  if (!["shop","requests","backend"].includes(v)) v = "shop";
+  $("shopView").hidden = v !== "shop"; $("requestsView").hidden = v !== "requests"; if ($("backendView")) $("backendView").hidden = v !== "backend";
+  $("tabs").hidden = v === "backend";
+  document.querySelectorAll(".tab").forEach(a => a.setAttribute("aria-current", a.dataset.view === v ? "page" : "false"));
+  if (v === "backend") fillBackend(); else renderShop();
+  if (v === "requests") renderRequest();
+}
+
+/* ---------- shop ---------- */
+function renderHeader(){
+  $("shopName").textContent = S.shop.name || "My Shop";
+  document.querySelectorAll(".ownerName").forEach(e => e.textContent = S.shop.owner || "the owner");
+  $("saleChip").hidden = !S.shop.saleOn; $("saleChip").textContent = (S.shop.salePct || 0) + "% off sale";
+  $("whereChip").hidden = !S.shop.where; $("whereChip").textContent = "Store: " + (S.shop.where || "");
+  $("updated").textContent = S.updated ? "Prices updated " + S.updated : "";
+  const ports = (S.shop.portals || []).map(p => String(p || "").trim()).filter(Boolean);
+  $("portals").hidden = !ports.length;
+  $("portals").innerHTML = '<span class="label">Portal tags</span>' + ports.map(p => '<button type="button" class="chip portal" data-portal="' + esc(p) + '" title="Copy this portal tag"><code>' + esc(p) + '</code> <span class="small muted">copy</span></button>').join("");
+  $("shopNote").textContent = S.shop.note || ""; $("shopNote").hidden = !S.shop.note;
+  const id = String(S.shop.discordId || "").replace(/\D/g, "");
+  ["msgLink", "msgLinkTop"].forEach(k => { $(k).hidden = !id; if (id) $(k).href = "https://discord.com/users/" + id; });
+}
+function visibleItems(){
+  const q = $("q").value.trim().toLowerCase();
+  return S.items.filter(it => it.show !== false)
+    .filter(it => cat === "All" || it.cat === cat)
+    .filter(it => !tagFilter || (tagFilter === ANY_TOKEN ? !!tokenBy(it.token) : it.token === tagFilter || (tokenBy(it.token) || {}).c === tagFilter))
+    .filter(it => !$("inStock").checked || it.stock == null || it.stock > 0)
+    .filter(it => { if (!q) return true; const t = tokenBy(it.token); return (it.name + " " + it.cat + " " + (t ? t.n + " " + t.c : "")).toLowerCase().includes(q); })
+    .sort((a, b) => a.cat.localeCompare(b.cat) || a.name.localeCompare(b.name));
+}
+function renderCats(){
+  const cats = ["All"].concat([...new Set(S.items.filter(i => i.show !== false).map(i => i.cat))].sort());
+  if (!cats.includes(cat)) cat = "All";
+  $("cats").innerHTML = cats.map(c => '<button type="button" class="cat" aria-pressed="' + (c === cat) + '" data-cat="' + esc(c) + '">' + esc(c) + "</button>").join("");
+  const tcats = [...new Set(S.items.filter(i => i.show !== false && tokenBy(i.token)).map(i => tokenBy(i.token).c))].sort();
+  $("tokCats").innerHTML = '<span class="label" style="align-self:center;margin-right:2px">Merchant tokens</span>' +
+    [ANY_TOKEN].concat(tcats).map(c => '<button type="button" class="cat tokcat" aria-pressed="' + (c === tagFilter) + '" data-tag="' + esc(c) + '">' + esc(c === ANY_TOKEN ? "Earns a token" : c) + "</button>").join("");
+  $("tagFilter").hidden = !tagFilter; $("tagName").textContent = tagFilter === ANY_TOKEN ? "items that earn a Merchant token" : (tagFilter || "");
+}
+function renderWares(){
+  const list = visibleItems();
+  if (!list.length){ $("wares").innerHTML = '<div class="empty">No items match. Try another word or category.</div>'; return; }
+  let html = "", last = null;
+  list.forEach(it => {
+    if (it.cat !== last){ if (last !== null) html += "</div>"; html += '<div class="group"><h3>' + esc(it.cat) + "</h3>"; last = it.cat; }
+    const out = it.stock != null && it.stock <= 0, sp = salePrice(it), t = it.token ? tokenBy(it.token) : null;
+    html += '<div class="ware" role="button" tabindex="0" data-pick="' + it.id + '" aria-selected="' + (selected === it.id) + '"><div><div class="nm">' + esc(it.name) + '</div><div class="tags">' +
+      (it.stock == null ? "" : '<span class="stock ' + (out ? "out" : "ok") + '">' + (out ? "Out of stock" : it.stock + " in stock") + "</span>") +
+      (t ? '<button type="button" class="tag" data-tag="' + esc(t.n) + '" title="Show every item for this token">' + esc(t.n) + '</button><button type="button" class="tag kind" data-tag="' + esc(t.c) + '" title="Show every ' + esc(t.c) + ' item">' + esc(t.c) + "</button>" : "") +
+      '</div></div><div class="price">' + (sp !== it.price ? "<s>" + fmt(it.price) + "</s>" : "") + '<span class="amt">' + fmt(sp) + '</span><span class="per">' + esc(perText(it)) + "</span></div></div>";
+  });
+  $("wares").innerHTML = html + "</div>";
+}
+function renderHelper(){
+  const it = S.items.find(i => i.id === selected), owner = S.shop.owner || "the owner";
+  $("helper").classList.toggle("idle", !it);
+  if (!it){ $("helperBody").innerHTML = '<p class="small muted" style="margin:0">Bought something here? Tap the item and copy the bot command to claim your Merchant token.</p>'; return; }
+  const t = tokenBy(it.token);
+  if (!t){ $("helperBody").innerHTML = "<b>" + esc(it.name) + '</b><p class="small muted" style="margin:4px 0 0">This item doesn\'t count toward a Merchant token.</p>'; return; }
+  const max = repeatOf(t); amount = Math.min(Math.max(1, amount), max);
+  const cmd = "/merchant token token:" + t.n + " amount:" + amount + " notes:Bought " + unitText(it, amount) + " " + it.name + " from " + owner + " recipient:@" + owner;
+  $("helperBody").innerHTML = '<div style="display:grid;gap:8px"><div><b>' + esc(it.name) + '</b><div class="tags"><span class="tag">' + esc(t.n) + '</span><span class="tag kind">' + esc(t.c) + "</span></div></div>" +
+    '<div class="rule">' + esc(t.d) + (t.x ? " " + esc(t.x) : "") + "</div>" +
+    '<div class="row"><span class="small"><b>How many ' + esc(String(it.unit) === "each" ? "did you buy" : (/^\d+$/.test(String(it.unit)) ? "lots" : it.unit + "s")) + '?</b><br><span class="muted">Counts up to ' + max + " times</span></span>" +
+    '<span class="qty"><button type="button" data-amt="-1" aria-label="Less"' + (amount <= 1 ? " disabled" : "") + '>&minus;</button><span>' + amount + '</span><button type="button" data-amt="1" aria-label="More"' + (amount >= max ? " disabled" : "") + ">+</button></span></div>" +
+    '<div class="cmd"><div class="row"><b class="small">Bot command</b><button class="btn mini" type="button" id="copyCmd">Copy</button></div><code id="cmdText">' + esc(cmd) + "</code></div></div>";
+}
+function renderSpender(){
+  const n = Number($("spent").value) || 0, owner = S.shop.owner || "the owner";
+  if (!n){ $("spenderOut").innerHTML = '<div class="small muted">The Spender token counts purchases of 1,500g or more.</div>'; return; }
+  if (n < 1500){ $("spenderOut").innerHTML = '<div class="small muted">Spender needs 1,500g or more. You\'re ' + fmt(1500 - n) + " short.</div>"; return; }
+  const what = $("spentWhat").value.trim();
+  const cmd = "/merchant token token:Spender amount:1 notes:Spent " + fmt(n) + " at " + (S.shop.name || owner) + " (seller " + owner + ")" + (what ? ": " + what : "");
+  $("spenderOut").innerHTML = '<div class="cmd"><div class="row"><b class="small">Spender command</b><button class="btn mini" type="button" id="copySpender">Copy</button></div><code id="spenderText">' + esc(cmd) +
+    '</code><div class="small muted">No recipient on this one. The seller goes in the notes.</div></div>';
+}
+function renderShop(){ renderHeader(); renderCats(); renderWares(); renderHelper(); renderSpender(); }
+
+/* ---------- requests ---------- */
+function renderRequest(){
+  $("rItems").innerHTML = [...new Set(S.items.map(i => i.name).concat(CATALOG.map(c => c.name)))].sort().map(n => '<option value="' + esc(n) + '">').join("");
+  const item = $("rItem").value.trim(), offer = $("rOffer").value;
+  if (!item){ $("reqMsg").textContent = "Fill in the item and your offer to build your message."; return; }
+  const owner = S.shop.owner || "there", qty = $("rQty").value.trim(), by = $("rBy").value.trim(), notes = $("rNotes").value.trim();
+  const plural = qty && !/^(1|one|a|an)\b/i.test(qty);
+  let what = (qty ? qty + (/\bof$/i.test(qty) ? " " : " of ") : "") + item;
+  what += offer ? " for " + fmt(offer) : "";
+  if (by) what += ", needed by " + by;
+  let msg = "Hi " + owner + "!\nI'd like to put in a request for " + what + ". Would you be able to supply " + (plural ? "those" : "that") + "?";
+  if (notes) msg += "\n" + notes;
+  $("reqMsg").textContent = msg;
+}
+
+/* ---------- copy ---------- */
+async function copyText(text, btn){
+  try { await navigator.clipboard.writeText(text); flash(btn, "Copied"); }
+  catch(e){ const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); flash(btn, "Copied"); } catch(_) { flash(btn, "Select and copy"); } ta.remove(); }
+}
+function flash(btn, msg){ if (!btn) return; const o = btn.textContent; btn.textContent = msg; setTimeout(() => { btn.textContent = o; }, 1400); }
+
+
+/* ---------- events ---------- */
+document.addEventListener("click", e => {
+  const b = e.target.closest("button, [data-pick]"); if (!b) return;
+  if (b.dataset.tag){ e.stopPropagation(); tagFilter = tagFilter === b.dataset.tag && b.classList.contains("tokcat") ? null : b.dataset.tag; cat = "All"; renderCats(); renderWares(); return; }
+  if (b.dataset.portal){ copyText(b.dataset.portal, b.querySelector(".muted")); return; }
+  if (b.dataset.cat){ cat = b.dataset.cat; renderCats(); renderWares(); }
+  else if (b.dataset.pick){ if (selected !== b.dataset.pick){ selected = b.dataset.pick; amount = 1; } renderWares(); renderHelper(); }
+  else if (b.dataset.amt){ amount += Number(b.dataset.amt); renderHelper(); }
+  else if (b.id === "copyCmd") copyText($("cmdText").textContent, b);
+  else if (b.id === "copySpender") copyText($("spenderText").textContent, b);
+  else if (b.dataset.step){
+    const tr = b.closest("tr"), it = S.items.find(i => i.id === tr.dataset.id);
+    it.stock = Math.max(0, (it.stock || 0) + Number(b.dataset.step)); tr.querySelector('[data-f="stock"]').value = it.stock; markDirty();
+  }
+  else if (b.dataset.remove){
+    if (b.dataset.sure){ S.items = S.items.filter(i => i.id !== b.dataset.remove); renderRows(); markDirty(); }
+    else { b.dataset.sure = "1"; b.textContent = "Sure?"; setTimeout(() => { if (b.isConnected){ delete b.dataset.sure; b.textContent = "Remove"; } }, 3000); }
+  }
+});
+document.addEventListener("keydown", e => { const w = e.target.closest && e.target.closest("[data-pick]"); if (w && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); w.click(); } });
+$("closeHelper").onclick = () => { selected = null; renderWares(); renderHelper(); };
+$("clearTag").onclick = () => { tagFilter = null; renderCats(); renderWares(); };
+$("q").oninput = renderWares; $("inStock").onchange = renderWares;
+$("spent").oninput = renderSpender; $("spentWhat").oninput = renderSpender;
+["rItem","rQty","rOffer","rBy","rNotes"].forEach(id => $(id).addEventListener("input", renderRequest));
+$("copyReq").onclick = e => { if ($("rItem").value.trim()) copyText($("reqMsg").textContent, e.currentTarget); };
+
+window.addEventListener("hashchange", route);
+
+route();
+
+
+})();
+</script>
+</body></html>
