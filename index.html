@@ -86,6 +86,8 @@ button{cursor:pointer}
 .qty{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:8px;background:var(--bg);overflow:hidden}
 .qty button{border:0;background:transparent;width:32px;height:32px;font-size:1.1rem;font-weight:700}
 .qty span{min-width:28px;text-align:center;font-variant-numeric:tabular-nums;font-weight:700}
+.qty input{width:48px;border:0;background:transparent;text-align:center;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink);-moz-appearance:textfield;appearance:textfield}
+.qty input::-webkit-inner-spin-button,.qty input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .rule{font-size:.86rem;color:var(--muted)}
 .field{display:grid;gap:3px;font-size:.82rem;color:var(--muted);font-weight:600}
 .field input,.field select,.field textarea{border:1px solid var(--line);background:var(--bg);border-radius:6px;padding:7px 9px;min-width:0;width:100%;color:var(--ink);font-weight:400}
@@ -304,12 +306,12 @@ function renderHelper(){
   if (!it){ $("helperBody").innerHTML = '<p class="small muted" style="margin:0">Bought something from me? Tap the item and copy the bot command to claim your Merchant token.</p>'; return; }
   const t = tokenBy(it.token);
   if (!t){ $("helperBody").innerHTML = "<b>" + esc(it.name) + '</b><p class="small muted" style="margin:4px 0 0">This item doesn\'t count toward a Merchant token.</p>'; return; }
-  const max = repeatOf(t); amount = Math.min(Math.max(1, amount), max);
+  const lim = repeatOf(t), max = 999; amount = Math.min(Math.max(1, Math.round(amount) || 1), max);
   const cmd = "/merchant token token:" + t.n + " amount:" + amount + " notes:Bought " + unitText(it, amount) + " " + it.name + " from " + owner + " recipient:@" + owner;
   $("helperBody").innerHTML = '<div style="display:grid;gap:8px"><div><b>' + esc(it.name) + '</b><div class="tags"><span class="tag">' + esc(t.n) + '</span><span class="tag kind">' + esc(t.c) + "</span></div></div>" +
     '<div class="rule">' + esc(t.d) + (t.x ? " " + esc(t.x) : "") + "</div>" +
-    '<div class="row"><span class="small"><b>How many ' + esc(String(it.unit) === "each" ? "did you buy" : (/^\d+$/.test(String(it.unit)) ? "lots" : it.unit + "s")) + '?</b><br><span class="muted">Counts up to ' + max + " times</span></span>" +
-    '<span class="qty"><button type="button" data-amt="-1" aria-label="Less"' + (amount <= 1 ? " disabled" : "") + '>&minus;</button><span>' + amount + '</span><button type="button" data-amt="1" aria-label="More"' + (amount >= max ? " disabled" : "") + ">+</button></span></div>" +
+    '<div class="row"><span class="small"><b>How many ' + esc(String(it.unit) === "each" ? "did you buy" : (/^\d+$/.test(String(it.unit)) ? "lots" : it.unit + "s")) + '?</b><br><span class="muted">Enter everything you bought' + (lim < 99 ? ", even past " + lim + ". The token counts up to " + lim + " times." : ".") + "</span></span>" +
+    '<span class="qty"><button type="button" data-amt="-1" aria-label="Less"' + (amount <= 1 ? " disabled" : "") + '>&minus;</button><input id="amtIn" type="number" min="1" max="999" inputmode="numeric" value="' + amount + '" aria-label="How many"><button type="button" data-amt="1" aria-label="More"' + (amount >= max ? " disabled" : "") + ">+</button></span></div>" +
     '<div class="cmd"><div class="row"><b class="small">Bot command</b><button class="btn mini" type="button" id="copyCmd">Copy</button></div><code id="cmdText">' + esc(cmd) + "</code></div></div>";
 }
 function renderSpender(){
@@ -367,6 +369,7 @@ document.addEventListener("click", e => {
   }
 });
 document.addEventListener("keydown", e => { const w = e.target.closest && e.target.closest("[data-pick]"); if (w && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); w.click(); } });
+document.addEventListener("change", e => { if (e.target.id === "amtIn"){ amount = Number(e.target.value) || 1; renderHelper(); } });
 $("closeHelper").onclick = () => { selected = null; renderWares(); renderHelper(); };
 $("clearTag").onclick = () => { tagFilter = null; renderCats(); renderWares(); };
 $("q").oninput = renderWares; $("inStock").onchange = renderWares;
