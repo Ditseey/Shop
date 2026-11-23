@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
 
+
 <title>Ditseey's Shop</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&amp;family=Source+Sans+3:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap">
 <style>
@@ -133,10 +134,10 @@ textarea.listing{font-family:var(--mono);font-size:.8rem;min-height:220px;width:
         <span class="chip sale" id="saleChip" hidden="">Sale</span>
         <span class="small muted" id="updated"></span>
       </div>
-      <div class="sub" id="portals" hidden></div>
+      <div class="sub" id="portals" hidden=""></div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <a class="btn primary" id="msgLinkTop" href="#" target="_blank" rel="noopener" hidden>Message <span class="ownerName">Ditseey</span> on Discord</a>
+      <a class="btn primary" id="msgLinkTop" href="#" target="_blank" rel="noopener" hidden="">Message me on Discord</a>
       
     </div>
   </header>
@@ -181,7 +182,7 @@ textarea.listing{font-family:var(--mono);font-size:.8rem;min-height:220px;width:
     <div class="reqgrid">
       <div class="card">
         <h2>Request an item</h2>
-        <p class="small muted" style="margin:0">Looking for something that isn't in the shop, or need more than what's in stock? Tell <span class="ownerName">Ditseey</span> what you want and what you'd pay. Fill this in, copy the message, and send it on Discord.</p>
+        <p class="small muted" style="margin:0">Looking for something that isn't in the shop, or need more than what's in stock? Tell me what you want and what you'd pay. Fill this in, copy the message, and send it on Discord.</p>
         <div class="form">
           <label style="grid-column:1/-1">Item<input id="rItem" list="rItems" placeholder="e.g. Black Metal" autocomplete="off"></label>
           <label>How many<input id="rQty" placeholder="e.g. 3 stacks"></label>
@@ -194,8 +195,8 @@ textarea.listing{font-family:var(--mono);font-size:.8rem;min-height:220px;width:
       <div class="card">
         <div class="row"><h2>Your request</h2><button class="btn mini" id="copyReq" type="button">Copy</button></div>
         <div class="cmd"><code id="reqMsg">Fill in the item and your offer to build your message.</code></div>
-        <div class="small muted">Copy it, then open <b class="ownerName">Ditseey</b>'s Discord profile, click Message, and paste it in.</div>
-        <a class="btn teal" id="msgLink" href="#" target="_blank" rel="noopener" hidden="">Message <span class="ownerName">Ditseey</span> on Discord</a>
+        <div class="small muted">Copy it, then open my Discord profile, click Message, and paste it in.</div>
+        <a class="btn teal" id="msgLink" href="#" target="_blank" rel="noopener" hidden="">Message me on Discord</a>
       </div>
     </div>
   </section>
@@ -211,7 +212,7 @@ const CATALOG = [{"name": "Ashwood", "cat": "Wood & Building", "stack": 50, "uni
 const UNITS = [["stack","Stack"],["half stack","Half stack"],["each","Each"],["set","Set"],["2","Lot of 2"],["5","Lot of 5"],["10","Lot of 10"],["25","Lot of 25"]];
 let S = JSON.parse(document.getElementById("shop-data").textContent);
 let saved = JSON.stringify(S);
-let cat = "All", tagFilter = null, selected = null, amount = 1, canEdit = false, artifactNs = null;
+let cat = "All", tagFilter = null, selected = null, amount = 1, canEdit = false, artifactNs = null, inHost = false, editChecked = false;
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -237,9 +238,13 @@ function perText(it){
 
 /* ---------- views ---------- */
 function route(){
-  let v = (location.hash || "#shop").slice(1);
-  if (v === "backend" && !canEdit) v = "shop";
-  if (!["shop","requests","backend"].includes(v)) v = "shop";
+  let v = (location.hash || (inHost ? "#backend" : "#shop")).slice(1);
+  if (!["shop","requests","backend"].includes(v)) v = inHost ? "backend" : "shop";
+  if (v === "backend" && !canEdit){
+    if (inHost && !editChecked){ $("shopView").hidden = true; $("requestsView").hidden = true; $("tabs").hidden = true; return; }   // still checking who you are
+    v = "shop";
+  }
+  if ($("adminLink")) $("adminLink").hidden = !canEdit || v === "backend";
   $("shopView").hidden = v !== "shop"; $("requestsView").hidden = v !== "requests"; if ($("backendView")) $("backendView").hidden = v !== "backend";
   $("tabs").hidden = v === "backend";
   document.querySelectorAll(".tab").forEach(a => a.setAttribute("aria-current", a.dataset.view === v ? "page" : "false"));
@@ -296,7 +301,7 @@ function renderWares(){
 function renderHelper(){
   const it = S.items.find(i => i.id === selected), owner = S.shop.owner || "the owner";
   $("helper").classList.toggle("idle", !it);
-  if (!it){ $("helperBody").innerHTML = '<p class="small muted" style="margin:0">Bought something here? Tap the item and copy the bot command to claim your Merchant token.</p>'; return; }
+  if (!it){ $("helperBody").innerHTML = '<p class="small muted" style="margin:0">Bought something from me? Tap the item and copy the bot command to claim your Merchant token.</p>'; return; }
   const t = tokenBy(it.token);
   if (!t){ $("helperBody").innerHTML = "<b>" + esc(it.name) + '</b><p class="small muted" style="margin:4px 0 0">This item doesn\'t count toward a Merchant token.</p>'; return; }
   const max = repeatOf(t); amount = Math.min(Math.max(1, amount), max);
