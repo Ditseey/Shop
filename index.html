@@ -114,16 +114,45 @@ button{cursor:pointer}
 .tbl th{text-align:left;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:6px;border-bottom:1px solid var(--line)}
 .tbl td{padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
 .tbl td.num input{width:80px;text-align:right}
+.tbl input:disabled,.form input:disabled{opacity:.35;cursor:not-allowed}
 .tbl .stockbox{display:flex;gap:4px;align-items:center}
 .tbl .stockbox input{width:56px;text-align:right}
 .savebar{position:sticky;bottom:0;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--accent);border-radius:10px;padding:10px 14px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}
-textarea.listing{font-family:var(--mono);font-size:.8rem;min-height:220px;width:100%;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:10px;color:var(--ink)}
+textarea.listing{font-family:var(--mono);font-size:.8rem;min-height:120px;resize:vertical;width:100%;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:10px;color:var(--ink)}
 .hint{font-size:.82rem;color:var(--muted)}
 .dirty{color:var(--warn);font-weight:700}
+.topgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:960px){.topgrid{grid-template-columns:minmax(0,1fr)}}
+.card.foldable{position:relative}
+.card.foldable > .cardhead{padding-right:110px}
+.card.collapsed > :not(.cardhead):not(.foldbtn){display:none!important}
+.card.collapsed{gap:0}
+.card > .foldbtn{position:absolute;top:12px;right:12px}
+.foldbtn{border:0;background:transparent;color:var(--amethyst);font-weight:600;font-size:.88rem;display:inline-flex;align-items:center;gap:6px;padding:4px 6px;border-radius:6px;white-space:nowrap}
+.foldbtn:hover{background:var(--surface2)}
+.foldbtn .chev{display:inline-block;transition:transform .15s;font-size:.75rem}
+.card.collapsed .foldbtn .chev{transform:rotate(180deg)}
+/* statistics */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.tile .n{font-family:var(--display);font-size:1.6rem;font-variant-numeric:tabular-nums}
+.ticker td.num,.ticker th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ticker tr.pick{cursor:pointer}
+.ticker tr.pick:hover td{background:var(--surface2)}
+.ticker tr[aria-selected="true"] td{background:var(--teal-soft)}
+.delta{display:inline-block;border-radius:999px;padding:1px 8px;font-size:.78rem;font-weight:700}
+.delta.up{background:rgba(244,154,176,.16);color:var(--sale)}
+.delta.down{background:rgba(122,211,180,.16);color:var(--good)}
+.delta.even{background:var(--surface2);color:var(--muted)}
+.chartbox{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px;overflow-x:auto}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.8rem;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}
+.statsgrid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:960px){.statsgrid{grid-template-columns:minmax(0,1fr)}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
-<script id="shop-data" type="application/json">{"shop":{"name":"Ditseey's Shop","owner":"Ditseey","discordId":"275074981505925120","where":"","note":"Everything here is for sale at my in-game store.","saleOn":false,"salePct":25},"items":[{"id":"i01","name":"Ashwood","cat":"Wood & Building","price":200,"unit":"stack","stack":50,"stock":22,"token":"I Can't Believe It's Not Coal","show":true},{"id":"i02","name":"Asksvin Bladder","cat":"Hides & Drops","price":50,"unit":"stack","stack":50,"stock":0,"token":"Why Are You Asksvin Me?","show":true},{"id":"i03","name":"Asksvin Hide","cat":"Hides & Drops","price":50,"unit":"stack","stack":50,"stock":0,"token":"Why Are You Asksvin Me?","show":true},{"id":"i04","name":"Asksvin Tail","cat":"Hides & Drops","price":50,"unit":"stack","stack":20,"stock":0,"token":"","show":true},{"id":"i05","name":"Barley","cat":"Farmed Goods","price":100,"unit":"stack","stack":100,"stock":6,"token":"Seed Banking","show":true},{"id":"i06","name":"Black Core","cat":"Cores & Gems","price":100,"unit":"each","stack":1,"stock":0,"token":"","show":true},{"id":"i07","name":"Black Marble","cat":"Wood & Building","price":80,"unit":"stack","stack":100,"stock":null,"token":"Misty Merchant","show":true},{"id":"i08","name":"Black Metal","cat":"Metals","price":250,"unit":"stack","stack":30,"stock":0,"token":"Metalworker","show":true},{"id":"i09","name":"Blood Bags","cat":"Hides & Drops","price":75,"unit":"stack","stack":50,"stock":6,"token":"Bloodbagger","show":true},{"id":"i10","name":"Boar Meat","cat":"Meat","price":20,"unit":"stack","stack":20,"stock":6,"token":"Butcher","show":true},{"id":"i11","name":"Carapace Arrows","cat":"Ammo","price":75,"unit":"stack","stack":100,"stock":0,"token":"Fletcher","show":true},{"id":"i12","name":"Carrots","cat":"Farmed Goods","price":75,"unit":"stack","stack":50,"stock":0,"token":"Veggie Sales","show":true},{"id":"i13","name":"Charred Bolt","cat":"Ammo","price":75,"unit":"stack","stack":100,"stock":null,"token":"Not So Magic Missile","show":true},{"id":"i14","name":"Chicken Meat","cat":"Meat","price":50,"unit":"stack","stack":20,"stock":6,"token":"Butcher","show":true},{"id":"i15","name":"Cloudberries","cat":"Pickables","price":50,"unit":"stack","stack":50,"stock":12,"token":"Very Berry","show":true},{"id":"i16","name":"Copper","cat":"Metals","price":60,"unit":"stack","stack":30,"stock":0,"token":"Bronze Age Prospector","show":true},{"id":"i17","name":"Crystal","cat":"Crafting Supplies","price":250,"unit":"stack","stack":50,"stock":15,"token":"Crystal Clear","show":true},{"id":"i18","name":"Deer Hide","cat":"Hides & Drops","price":50,"unit":"stack","stack":50,"stock":0,"token":"","show":true},{"id":"i19","name":"Feathers","cat":"Hides & Drops","price":50,"unit":"stack","stack":50,"stock":0,"token":"Bird Is The Word","show":true},{"id":"i20","name":"Flametal","cat":"Metals","price":300,"unit":"half stack","stack":15,"stock":0,"token":"","show":true},{"id":"i21","name":"Gem Set","cat":"Cores & Gems","price":999,"unit":"set","stack":3,"stock":0,"token":"My Preciouses","show":true},{"id":"i22","name":"Grausten","cat":"Wood & Building","price":50,"unit":"stack","stack":50,"stock":36,"token":"Ashen Adventurer","show":true},{"id":"i23","name":"Hare Meat","cat":"Meat","price":100,"unit":"stack","stack":20,"stock":6,"token":"Butcher","show":true},{"id":"i24","name":"Leather Scraps","cat":"Hides & Drops","price":25,"unit":"stack","stack":50,"stock":0,"token":"","show":true},{"id":"i25","name":"Lox Meat","cat":"Meat","price":50,"unit":"stack","stack":20,"stock":18,"token":"Butcher","show":true},{"id":"i26","name":"Molten Core","cat":"Cores & Gems","price":100,"unit":"2","stack":2,"stock":0,"token":"","show":true},{"id":"i27","name":"Obsidian","cat":"Crafting Supplies","price":150,"unit":"stack","stack":50,"stock":4,"token":"Black Glass","show":true},{"id":"i28","name":"Onions","cat":"Farmed Goods","price":75,"unit":"stack","stack":50,"stock":9,"token":"Veggie Sales","show":true},{"id":"i29","name":"Red Mushrooms","cat":"Pickables","price":75,"unit":"stack","stack":50,"stock":9,"token":"Fun Gal","show":true},{"id":"i30","name":"Silver","cat":"Metals","price":300,"unit":"stack","stack":30,"stock":0,"token":"Metalworker","show":true},{"id":"i31","name":"Tar","cat":"Crafting Supplies","price":250,"unit":"stack","stack":50,"stock":24,"token":"Tarrific","show":true},{"id":"i32","name":"Turnip Seeds","cat":"Seeds","price":100,"unit":"stack","stack":100,"stock":4,"token":"Seed Banking","show":true},{"id":"i33","name":"Turnips","cat":"Farmed Goods","price":75,"unit":"stack","stack":50,"stock":11,"token":"Veggie Sales","show":true},{"id":"i34","name":"Wolf Meat","cat":"Meat","price":50,"unit":"stack","stack":20,"stock":0,"token":"Butcher","show":true},{"id":"i35","name":"Yellow Mushrooms","cat":"Pickables","price":75,"unit":"stack","stack":50,"stock":1,"token":"Fun Gal","show":true}],"updated":"2026-11-23"}</script>
+<script id="shop-data" type="application/json">{"shop":{"name":"Ditseey's Shop","owner":"Ditseey","discordId":"275074981505925120","where":"","note":"Everything here is for sale at my in-game store.","saleOn":false,"salePct":25},"items":[{"id":"i01","name":"Ashwood","cat":"Wood & Building","price":200,"unit":"stack","stack":50,"stock":0,"token":"I Can't Believe It's Not Coal","show":true},{"id":"i02","name":"Asksvin Bladder","cat":"Hides & Drops","price":50,"unit":"stack","stack":50,"stock":0,"token":"Why Are You Asksvin Me?","show":true},{"id":"i03","name":"Asksvin Hide","cat":"Hides & Drops","price":50,"unit":"stack","stack":50,"stock":0,"token":"Why Are You Asksvin Me?","show":true},{"id":"i04","name":"Asksvin Tail","cat":"Hides & Drops","price":50,"unit":"stack","stack":20,"stock":0,"token":"","show":true},{"id":"i05","name":"Barley","cat":"Farmed Goods","price":100,"unit":"stack","stack":100,"stock":0,"token":"Seed Banking","show":true},{"id":"i06","name":"Black Core","cat":"Cores & Gems","price":100,"unit":"each","stack":1,"stock":0,"token":"","show":true},{"id":"i07","name":"Black Marble","cat":"Wood & Building","price":80,"unit":"stack","stack":100,"stock":0,"token":"Misty Merchant","show":true},{"id":"i08","name":"Black Metal","cat":"Metals","price":250,"unit":"stack","stack":30,"stock":0,"token":"Metalworker","show":true},{"id":"i09","name":"Blood Bags","cat":"Hides & Drops","price":75,"unit":"stack","stack":50,"stock":0,"token":"Bloodbagger","show":true},{"id":"i10","name":"Boar Meat","cat":"Meat","price":20,"unit":"stack","stack":20,"stock":0,"token":"Butcher","show":true},{"id":"i11","name":"Carapace Arrows","cat":"Ammo","price":75,"unit":"stack","stack":100,"stock":0,"token":"Fletcher","show":true},{"id":"i12","name":"Carrots","cat":"Farmed Goods","price":75,"unit":"stack","stack":50,"stock":0,"token":"Veggie Sales","show":true},{"id":"i13","name":"Charred Bolt","cat":"Ammo","price":75,"unit":"stack","stack":100,"stock":0,"token":"Not So Magic Missile","show":true},{"id":"i14","name":"Chicken Meat","cat":"Meat","price":50,"unit":"stack","stack":20,"stock":0,"token":"Butcher","show":true},{"id":"i15","name":"Cloudberries","cat":"Pickables","price":50,"unit":"stack","stack":50,"stock":0,"token":"Very Berry","show":true},{"id":"i16","name":"Copper","cat":"Metals","price":60,"unit":"stack","stack":30,"stock":0,"token":"Bronze Age Prospector","show":true},{"id":"i17","name":"Crystal","cat":"Crafting Supplies","price":250,"unit":"stack","stack":50,"stock":0,"token":"Crystal Clear","show":true},{"id":"i18","name":"Deer Hide","cat":"Hides & Drops","price":50,"unit":"stack","stack":50,"stock":0,"token":"","show":true},{"id":"i19","name":"Feathers","cat":"Hides & Drops","price":50,"unit":"stack","stack":50,"stock":0,"token":"Bird Is The Word","show":true},{"id":"i20","name":"Flametal","cat":"Metals","price":300,"unit":"half stack","stack":15,"stock":0,"token":"","show":true},{"id":"i21","name":"Gem Set","cat":"Cores & Gems","price":999,"unit":"set","stack":3,"stock":0,"token":"My Preciouses","show":true},{"id":"i22","name":"Grausten","cat":"Wood & Building","price":50,"unit":"stack","stack":50,"stock":0,"token":"Ashen Adventurer","show":true},{"id":"i23","name":"Hare Meat","cat":"Meat","price":100,"unit":"stack","stack":20,"stock":0,"token":"Butcher","show":true},{"id":"i24","name":"Leather Scraps","cat":"Hides & Drops","price":25,"unit":"stack","stack":50,"stock":0,"token":"","show":true},{"id":"i25","name":"Lox Meat","cat":"Meat","price":50,"unit":"stack","stack":20,"stock":0,"token":"Butcher","show":true},{"id":"i26","name":"Molten Core","cat":"Cores & Gems","price":100,"unit":"2","stack":2,"stock":0,"token":"","show":true},{"id":"i27","name":"Obsidian","cat":"Crafting Supplies","price":150,"unit":"stack","stack":50,"stock":0,"token":"Black Glass","show":true},{"id":"i28","name":"Onions","cat":"Farmed Goods","price":75,"unit":"stack","stack":50,"stock":0,"token":"Veggie Sales","show":true},{"id":"i29","name":"Red Mushrooms","cat":"Pickables","price":75,"unit":"stack","stack":50,"stock":0,"token":"Fun Gal","show":true},{"id":"i30","name":"Silver","cat":"Metals","price":300,"unit":"stack","stack":30,"stock":0,"token":"Metalworker","show":true},{"id":"i31","name":"Tar","cat":"Crafting Supplies","price":250,"unit":"stack","stack":50,"stock":0,"token":"Tarrific","show":true},{"id":"i32","name":"Turnip Seeds","cat":"Seeds","price":100,"unit":"stack","stack":100,"stock":0,"token":"Seed Banking","show":true},{"id":"i33","name":"Turnips","cat":"Farmed Goods","price":75,"unit":"stack","stack":50,"stock":0,"token":"Veggie Sales","show":true},{"id":"i34","name":"Wolf Meat","cat":"Meat","price":50,"unit":"stack","stack":20,"stock":0,"token":"Butcher","show":true},{"id":"i35","name":"Yellow Mushrooms","cat":"Pickables","price":75,"unit":"stack","stack":50,"stock":0,"token":"Fun Gal","show":true}],"updated":"2026-11-24"}</script>
 
 <div class="wrap">
   <header class="head">
@@ -223,6 +252,9 @@ const tokenBy = n => TOKENS.find(t => t.n === n);
 const round5 = n => Math.round(n / 5) * 5;
 const salePrice = it => S.shop.saleOn ? Math.max(5, round5(it.price * (1 - (Number(S.shop.salePct) || 0) / 100))) : it.price;
 const ANY_TOKEN = "Merchant token";
+const LEVEL_CATS = ["Weapons", "Armor"];
+const hasLevel = it => LEVEL_CATS.includes(it.cat);
+const lvName = it => it.name + (hasLevel(it) && it.level ? " (level " + it.level + ")" : "");
 const repeatOf = t => /^\d+$/.test(t.r) ? Number(t.r) : 99;
 function unitText(it, n){
   const u = String(it.unit);
@@ -241,16 +273,17 @@ function perText(it){
 /* ---------- views ---------- */
 function route(){
   let v = (location.hash || (inHost ? "#backend" : "#shop")).slice(1);
-  if (!["shop","requests","backend"].includes(v)) v = inHost ? "backend" : "shop";
-  if (v === "backend" && !canEdit){
+  if (!["shop","requests","backend","stats"].includes(v)) v = inHost ? "backend" : "shop";
+  if ((v === "backend" || v === "stats") && !canEdit){
     if (inHost && !editChecked){ $("shopView").hidden = true; $("requestsView").hidden = true; $("tabs").hidden = true; return; }   // still checking who you are
     v = "shop";
   }
-  if ($("adminLink")) $("adminLink").hidden = !canEdit || v === "backend";
+  if ($("adminLink")) $("adminLink").hidden = !canEdit || v === "backend" || v === "stats";
   $("shopView").hidden = v !== "shop"; $("requestsView").hidden = v !== "requests"; if ($("backendView")) $("backendView").hidden = v !== "backend";
-  $("tabs").hidden = v === "backend";
+  if ($("statsView")) $("statsView").hidden = v !== "stats";
+  $("tabs").hidden = v === "backend" || v === "stats";
   document.querySelectorAll(".tab").forEach(a => a.setAttribute("aria-current", a.dataset.view === v ? "page" : "false"));
-  if (v === "backend") fillBackend(); else renderShop();
+  if (v === "backend") fillBackend(); else if (v === "stats") renderStats(); else renderShop();
   if (v === "requests") renderRequest();
 }
 
@@ -295,6 +328,7 @@ function renderWares(){
     const out = it.stock != null && it.stock <= 0, sp = salePrice(it), t = it.token ? tokenBy(it.token) : null;
     html += '<div class="ware" role="button" tabindex="0" data-pick="' + it.id + '" aria-selected="' + (selected === it.id) + '"><div><div class="nm">' + esc(it.name) + '</div><div class="tags">' +
       (it.stock == null ? "" : '<span class="stock ' + (out ? "out" : "ok") + '">' + (out ? "Out of stock" : it.stock + " in stock") + "</span>") +
+      (hasLevel(it) && it.level ? '<span class="tag kind" style="color:var(--amethyst)">Level ' + esc(it.level) + "</span>" : "") +
       (t ? '<button type="button" class="tag" data-tag="' + esc(t.n) + '" title="Show every item for this token">' + esc(t.n) + '</button><button type="button" class="tag kind" data-tag="' + esc(t.c) + '" title="Show every ' + esc(t.c) + ' item">' + esc(t.c) + "</button>" : "") +
       '</div></div><div class="price">' + (sp !== it.price ? "<s>" + fmt(it.price) + "</s>" : "") + '<span class="amt">' + fmt(sp) + '</span><span class="per">' + esc(perText(it)) + "</span></div></div>";
   });
@@ -307,7 +341,7 @@ function renderHelper(){
   const t = tokenBy(it.token);
   if (!t){ $("helperBody").innerHTML = "<b>" + esc(it.name) + '</b><p class="small muted" style="margin:4px 0 0">This item doesn\'t count toward a Merchant token.</p>'; return; }
   const lim = repeatOf(t), max = 999; amount = Math.min(Math.max(1, Math.round(amount) || 1), max);
-  const cmd = "/merchant token token:" + t.n + " amount:" + amount + " notes:Bought " + unitText(it, amount) + " " + it.name + " from " + owner + " recipient:@" + owner;
+  const cmd = "/merchant token token:" + t.n + " amount:" + amount + " notes:Bought " + unitText(it, amount) + " " + lvName(it) + " from " + owner + " recipient:@" + owner;
   $("helperBody").innerHTML = '<div style="display:grid;gap:8px"><div><b>' + esc(it.name) + '</b><div class="tags"><span class="tag">' + esc(t.n) + '</span><span class="tag kind">' + esc(t.c) + "</span></div></div>" +
     '<div class="rule">' + esc(t.d) + (t.x ? " " + esc(t.x) : "") + "</div>" +
     '<div class="row"><span class="small"><b>How many ' + esc(String(it.unit) === "each" ? "did you buy" : (/^\d+$/.test(String(it.unit)) ? "lots" : it.unit + "s")) + '?</b><br><span class="muted">Enter everything you bought' + (lim < 99 ? ", even past " + lim + ". The token counts up to " + lim + " times." : ".") + "</span></span>" +
