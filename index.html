@@ -278,19 +278,21 @@ function perText(it){
 /* ---------- views ---------- */
 function route(){
   let v = (location.hash || (inHost ? "#backend" : "#shop")).slice(1);
-  if (!["shop","requests","backend","stats"].includes(v)) v = inHost ? "backend" : "shop";
-  if ((v === "backend" || v === "stats") && !canEdit){
+  if (!["shop","requests","backend","stats","sales"].includes(v)) v = inHost ? "backend" : "shop";
+  const adminView = v === "backend" || v === "stats" || v === "sales";
+  if (adminView && !canEdit){
     if (inHost && !editChecked){ $("shopView").hidden = true; $("requestsView").hidden = true; $("tabs").hidden = true; return; }   // still checking who you are
     v = "shop";
   }
-  if ($("adminLink")) $("adminLink").hidden = !canEdit || v === "backend" || v === "stats";
+  if ($("adminLink")) $("adminLink").hidden = !canEdit || adminView;
   $("shopView").hidden = v !== "shop"; $("requestsView").hidden = v !== "requests"; if ($("backendView")) $("backendView").hidden = v !== "backend";
   if ($("statsView")) $("statsView").hidden = v !== "stats";
-  document.querySelector(".wrap").classList.toggle("wide", v === "backend" || v === "stats");
-  $("tabs").hidden = v === "backend" || v === "stats";
+  if ($("salesView")) $("salesView").hidden = v !== "sales";
+  document.querySelector(".wrap").classList.toggle("wide", adminView);
+  $("tabs").hidden = adminView;
   document.querySelectorAll(".tab").forEach(a => a.setAttribute("aria-current", a.dataset.view === v ? "page" : "false"));
   renderHeader();
-  if (v === "backend") fillBackend(); else if (v === "stats") renderStats(); else renderShop();
+  if (v === "backend") fillBackend(); else if (v === "stats") renderStats(); else if (v === "sales") renderSales(); else renderShop();
   if (v === "requests") renderRequest();
 }
 
